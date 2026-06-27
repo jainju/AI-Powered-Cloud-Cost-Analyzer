@@ -24,9 +24,10 @@ class Settings(BaseSettings):
     each missing variable by name.
     """
 
-    # AWS credentials (required)
-    aws_access_key_id: str
-    aws_secret_access_key: str
+    # AWS credentials (optional — if not set, boto3 uses the default credential chain:
+    # IAM role, instance profile, environment variables, ~/.aws/credentials, etc.)
+    aws_access_key_id: Optional[str] = None
+    aws_secret_access_key: Optional[str] = None
     aws_default_region: str = "us-east-1"
     aws_session_token: Optional[str] = None
 

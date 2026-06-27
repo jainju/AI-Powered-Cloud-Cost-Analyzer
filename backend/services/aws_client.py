@@ -28,34 +28,22 @@ class AWSClientFactory:
     def __init__(self, settings: Settings) -> None:
         """Initialize the factory with application settings.
 
-        Creates a boto3 session using the provided credentials.
-        Raises AuthenticationError if required credentials are absent.
+        Creates a boto3 session using the provided credentials. If credentials
+        are not explicitly provided, boto3 will use its default credential chain
+        (IAM role, instance profile, environment variables, ~/.aws/credentials).
 
         Args:
             settings: Application settings containing AWS credentials and config.
-
-        Raises:
-            AuthenticationError: If required credential environment variables are missing.
         """
         self._settings = settings
 
-        # Validate that required credentials are present
-        missing = []
-        if not settings.aws_access_key_id:
-            missing.append("AWS_ACCESS_KEY_ID")
-        if not settings.aws_secret_access_key:
-            missing.append("AWS_SECRET_ACCESS_KEY")
-        if missing:
-            raise AuthenticationError(
-                f"Missing required AWS credentials: {', '.join(missing)}"
-            )
-
-        # Build session kwargs
+        # Build session kwargs — only include credentials if explicitly provided
         session_kwargs = {
-            "aws_access_key_id": settings.aws_access_key_id,
-            "aws_secret_access_key": settings.aws_secret_access_key,
             "region_name": settings.aws_default_region,
         }
+        if settings.aws_access_key_id and settings.aws_secret_access_key:
+            session_kwargs["aws_access_key_id"] = settings.aws_access_key_id
+            session_kwargs["aws_secret_access_key"] = settings.aws_secret_access_key
         if settings.aws_session_token:
             session_kwargs["aws_session_token"] = settings.aws_session_token
 
